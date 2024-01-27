@@ -3043,7 +3043,7 @@ def run():
     # Rebuild the database structure.
     print('CREATING new tables...', end=' ')
     sys.stdout.flush()
-    createTables(DB_TABLES, db_engine)
+    createTables(DB_TABLES, db_engine, conn=conn)
     print('DONE!')
     t('dropping and recreating the database')
     executeCustomQueries('AFTER_CREATE')
