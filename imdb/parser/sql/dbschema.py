@@ -402,7 +402,7 @@ def dropTables(tables, db_engine, ifExists=True):
         table.dropTable(db_engine, ifExists)
 
 
-def createTables(tables, db_engine, conn, ifNotExists=True):
+def createTables(tables, db_engine, ifNotExists=True):
     """Create the tables and insert default values."""
     for table in tables:
         # Create the table.
@@ -410,11 +410,13 @@ def createTables(tables, db_engine, conn, ifNotExists=True):
         table.createTable(db_engine, ifNotExists)
         # Insert default values, if any.
         if table._imdbpySchema.values:
+            conn = db_engine.connect()
             _dbschema_logger.info('inserting values into table %s', table._imdbpyName)
             for key in table._imdbpySchema.values:
                 for value in table._imdbpySchema.values[key]:
                     conn.execute(table(**{key: str(value)}))
                     # table(**{key: str(value)})
+            conn.close()
 
 
 def createIndexes(tables, db_engine, ifNotExists=True):
