@@ -297,8 +297,8 @@ class TableAdapter(object):
         """Drop the table."""
         dropParams = {'checkfirst': checkfirst}
         # Guess what?  Another work-around for a ibm_db bug.
-        if self.table.bind.engine.url.drivername.startswith('ibm_db'):
-            del dropParams['checkfirst']
+        # if self.table.bind.engine.url.drivername.startswith('ibm_db'):
+        #     del dropParams['checkfirst']
         try:
             self.table.drop(**dropParams)
         except exc.ProgrammingError:
