@@ -438,6 +438,8 @@ class _AlchemyConnection(object):
 def setConnection(uri, tables, encoding='utf8', debug=False):
     """Set connection for every table."""
     params = {'encoding': encoding}
+    if uri.startswith('postgres'):
+        params = {'client_encoding': encoding}
     # FIXME: why on earth MySQL requires an additional parameter,
     #        is well beyond my understanding...
     if uri.startswith('mysql'):
