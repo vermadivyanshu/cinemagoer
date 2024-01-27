@@ -24,6 +24,7 @@ import re
 import sys
 import logging
 from sqlalchemy import *
+import sqlalchemy as db
 from sqlalchemy import schema
 try:
     from sqlalchemy import exc  # 0.5
@@ -293,31 +294,31 @@ class TableAdapter(object):
         except IndexError:
             raise NotFoundError('no data for ID %s' % theID)
 
-    def dropTable(self, checkfirst=True):
+    def dropTable(self, db_engine, checkfirst=True):
         """Drop the table."""
         dropParams = {'checkfirst': checkfirst}
         # Guess what?  Another work-around for a ibm_db bug.
         # if self.table.bind.engine.url.drivername.startswith('ibm_db'):
         #     del dropParams['checkfirst']
         try:
-            self.table.drop(**dropParams)
+            self.table.drop(db_engine, **dropParams)
         except exc.ProgrammingError:
             # As above: re-raise the exception, but only if it's not ibm_db.
             if not self.table.bind.engine.url.drivername.startswith('ibm_db'):
                 raise
 
-    def createTable(self, checkfirst=True):
+    def createTable(self, db_engine, checkfirst=True):
         """Create the table."""
-        self.table.create(checkfirst=checkfirst)
+        self.table.create(db_engine, checkfirst=checkfirst)
         # Create indexes for alternateID columns (other indexes will be
         # created later, at explicit request for performances reasons).
         for col in self._imdbpySchema.cols:
             if col.name == 'id':
                 continue
             if col.params.get('alternateID', False):
-                self._createIndex(col, checkfirst=checkfirst)
+                self._createIndex(col, db_engine, checkfirst=checkfirst)
 
-    def _createIndex(self, col, checkfirst=True):
+    def _createIndex(self, col, db_engine, checkfirst=True):
         """Create an index for a given (schema) column."""
         idx_name = '%s_%s' % (self.table.name, col.index or col.name)
         if checkfirst:
@@ -337,16 +338,16 @@ class TableAdapter(object):
         #      sqlite, for example, expects index names to be unique at
         #      db-level.
         try:
-            idx.create()
+            idx.create(db_engine, checkfirst=checkfirst)
         except exc.OperationalError as e:
             _alchemy_logger.warn('Skipping creation of the %s.%s index: %s' %
                                  (self.sqlmeta.table, col.name, e))
 
-    def addIndexes(self, ifNotExists=True):
+    def addIndexes(self, db_engine, ifNotExists=True):
         """Create all required indexes."""
         for col in self._imdbpySchema.cols:
             if col.index:
-                self._createIndex(col, checkfirst=ifNotExists)
+                self._createIndex(col, db_engine, checkfirst=ifNotExists)
 
     def __call__(self, *args, **kwds):
         """To insert a new row with the syntax: TableClass(key=value, ...)"""
@@ -476,4 +477,4 @@ def setConnection(uri, tables, encoding='utf8', debug=False):
     connection.paramstyle = paramstyle
     connection.getConnection = lambda: connection.connection
     connection.dbName = engine.url.drivername
-    return connection
+    return (connection, engine)

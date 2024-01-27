@@ -392,22 +392,22 @@ DB_SCHEMA = [
 
 
 # Functions to manage tables.
-def dropTables(tables, ifExists=True):
+def dropTables(tables, db_engine, ifExists=True):
     """Drop the tables."""
     # In reverse order (useful to avoid errors about foreign keys).
     DB_TABLES_DROP = list(tables)
     DB_TABLES_DROP.reverse()
     for table in DB_TABLES_DROP:
         _dbschema_logger.info('dropping table %s', table._imdbpyName)
-        table.dropTable(ifExists)
+        table.dropTable(db_engine, ifExists)
 
 
-def createTables(tables, ifNotExists=True):
+def createTables(tables, db_engine, ifNotExists=True):
     """Create the tables and insert default values."""
     for table in tables:
         # Create the table.
         _dbschema_logger.info('creating table %s', table._imdbpyName)
-        table.createTable(ifNotExists)
+        table.createTable(db_engine, ifNotExists)
         # Insert default values, if any.
         if table._imdbpySchema.values:
             _dbschema_logger.info('inserting values into table %s', table._imdbpyName)
@@ -416,14 +416,14 @@ def createTables(tables, ifNotExists=True):
                     table(**{key: str(value)})
 
 
-def createIndexes(tables, ifNotExists=True):
+def createIndexes(tables, db_engine, ifNotExists=True):
     """Create the indexes in the database.
     Return a list of errors, if any."""
     errors = []
     for table in tables:
         _dbschema_logger.info('creating indexes for table %s', table._imdbpyName)
         try:
-            table.addIndexes(ifNotExists)
+            table.addIndexes(db_engine, ifNotExists)
         except Exception as e:
             errors.append(e)
             continue

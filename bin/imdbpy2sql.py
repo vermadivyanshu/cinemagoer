@@ -47,6 +47,8 @@ from imdb.utils import analyze_title, analyze_name, date_and_notes, \
 from imdb._exceptions import IMDbParserError, IMDbError
 from imdb.parser.sql.alchemyadapter import getDBTables, setConnection
 
+db_engine = None
+
 
 HELP = """imdbpy2sql.py usage:
     %s -d /directory/with/PlainTextDataFiles/ -u URI [-c /directory/for/CSV_files] [-i table,dbm] [--CSV-OPTIONS] [--COMPATIBILITY-OPTIONS]
@@ -502,7 +504,8 @@ def loadCSVFiles():
 #-----------------------
 
 
-conn = setConnection(URI, DB_TABLES)
+(conn, engine) = setConnection(URI, DB_TABLES)
+db_engine = engine
 if CSV_DIR:
     # Go for a CSV ride...
     CSV_CURS = CSVCursor(CSV_DIR)
@@ -2992,7 +2995,7 @@ def buildIndexesAndFK():
     print('building database indexes (this may take a while)')
     sys.stdout.flush()
     # Build database indexes.
-    idx_errors = createIndexes(DB_TABLES)
+    idx_errors = createIndexes(DB_TABLES, db_engine)
     for idx_error in idx_errors:
         print('ERROR caught exception creating an index: %s' % idx_error)
     t('createIndexes()')
@@ -3033,14 +3036,14 @@ def run():
     # Truncate the current database.
     print('DROPPING current database...', end=' ')
     sys.stdout.flush()
-    dropTables(DB_TABLES)
+    dropTables(DB_TABLES, db_engine)
     print('DONE!')
 
     executeCustomQueries('BEFORE_CREATE')
     # Rebuild the database structure.
     print('CREATING new tables...', end=' ')
     sys.stdout.flush()
-    createTables(DB_TABLES)
+    createTables(DB_TABLES, db_engine)
     print('DONE!')
     t('dropping and recreating the database')
     executeCustomQueries('AFTER_CREATE')
