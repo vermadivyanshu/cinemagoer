@@ -276,14 +276,16 @@ class TableAdapter(object):
         self.q = QAdapter(self.table, colMap=self.colMap)
         self.sqlmeta = SQLMetaAdapter(self.table, colMap=self.colMap)
 
-    def select(self, conditions=None):
+    def select(self, db_engine, conditions=None):
         """Return a list of results."""
-        result = self._ta_select(conditions).execute()
+        connection = db_engine.connect()
+        result = connection.execute(self._ta_select(conditions))
+        connection.close()
         return ResultAdapter(result, self.table, colMap=self.colMap)
 
-    def get(self, theID):
+    def get(self, db_engine, theID):
         """Get an object given its ID."""
-        result = self.select(self.table.c.id == theID)
+        result = self.select(db_engine, self.table.c.id == theID)
         # if not result:
         #    raise NotFoundError, 'no data for ID %s' % theID
         # FIXME: isn't this a bit risky?  We can't check len(result),

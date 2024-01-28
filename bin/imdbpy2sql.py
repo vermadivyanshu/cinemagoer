@@ -1077,7 +1077,7 @@ class MoviesCache(_BaseCache):
                 mdict['year'] = str(mdict['year'])
             episodeOfID = x[5]
             if episodeOfID is not None:
-                s = Title.get(episodeOfID)
+                s = Title.get(db_engine, episodeOfID)
                 series_d = {'title': s.title,
                             'kind': str(KIND_STRS[s.kindID]),
                             'year': s.productionYear, 'imdbIndex': s.imdbIndex}
@@ -2736,21 +2736,21 @@ def readConstants():
     global INFO_TYPES, MOVIELINK_IDS, KIND_IDS, KIND_STRS, \
         CCAST_TYPES, COMP_TYPES
 
-    for x in InfoType.select():
+    for x in InfoType.select(db_engine):
         INFO_TYPES[x.info] = x.id
 
-    for x in LinkType.select():
+    for x in LinkType.select(db_engine):
         MOVIELINK_IDS.append((x.link, len(x.link), x.id))
     MOVIELINK_IDS.sort(key=lambda x: operator.length_hint(x[0]), reverse=True)
 
-    for x in KindType.select():
+    for x in KindType.select(db_engine):
         KIND_IDS[x.kind] = x.id
         KIND_STRS[x.id] = x.kind
 
-    for x in CompCastType.select():
+    for x in CompCastType.select(db_engine):
         CCAST_TYPES[x.kind] = x.id
 
-    for x in CompanyType.select():
+    for x in CompanyType.select(db_engine):
         COMP_TYPES[x.kind] = x.id
 
 
