@@ -131,7 +131,7 @@ class DBTable(object):
 kindTypeDefs = {
     'kind': (
         'movie', 'tv series', 'tv movie', 'video movie',
-        'tv mini series', 'video game', 'episode', 'short', 'tv short'
+        'tv mini series', 'video game', 'episode', 'short', 'tv short', 'tv special'
     )
 }
 
