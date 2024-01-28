@@ -1463,6 +1463,7 @@ class SQLData(dict):
             self.clear()
             self.counter = self.counterInit
         except Exception as e:
+            print("expection", e)
             if isinstance(e, KeyboardInterrupt):
                 raise
             print('WARNING: SQLData; unknown exception caught committing the data')

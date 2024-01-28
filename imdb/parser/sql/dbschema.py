@@ -409,11 +409,13 @@ def createTables(tables, db_engine, ifNotExists=True):
         _dbschema_logger.info('creating table %s', table._imdbpyName)
         table.createTable(db_engine, ifNotExists)
         # Insert default values, if any.
+        print("table._imdbpySchema.values", table._imdbpySchema.values);
         if table._imdbpySchema.values:
             conn = db_engine.connect()
             _dbschema_logger.info('inserting values into table %s', table._imdbpyName)
             for key in table._imdbpySchema.values:
                 for value in table._imdbpySchema.values[key]:
+                    print("query", table(**{key: str(value)}))
                     conn.execute(table(**{key: str(value)}))
                     # table(**{key: str(value)})
             conn.close()
