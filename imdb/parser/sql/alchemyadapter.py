@@ -198,6 +198,7 @@ class ResultAdapter(object):
 
     def __init__(self, result, table, colMap=None):
         self.result = result
+        self.rows = result.fetchall()
         self.table = table
         if colMap is None:
             colMap = {}
@@ -208,12 +209,14 @@ class ResultAdapter(object):
 
     def __len__(self):
         # FIXME: why sqlite returns -1? (that's wrooong!)
+        if len(self.rows):
+            return len(self.rows)
         if self.result.rowcount == -1:
             return 0
         return self.result.rowcount
 
     def __getitem__(self, key):
-        rlist = list(self.result)
+        rlist = list(self.rows)
         res = rlist[key]
         if not isinstance(key, slice):
             # A single item.
@@ -224,7 +227,7 @@ class ResultAdapter(object):
                     for x in res]
 
     def __iter__(self):
-        for item in self.result:
+        for item in self.rows:
             yield RowAdapter(item, self.table, colMap=self.colMap)
 
     def __repr__(self):
@@ -281,6 +284,7 @@ class TableAdapter(object):
         connection = db_engine.connect()
         select_stmt = self._ta_select.where(conditions)
         result = connection.execute(select_stmt)
+        print("result", result)
         connection.close()
         return ResultAdapter(result, self.table, colMap=self.colMap)
 
