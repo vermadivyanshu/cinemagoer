@@ -418,6 +418,7 @@ def createTables(tables, db_engine, ifNotExists=True):
                     print("query", table(**{key: str(value)}))
                     conn.execute(table(**{key: str(value)}))
                     # table(**{key: str(value)})
+            conn.commit()
             conn.close()
 
 
