@@ -284,9 +284,9 @@ class TableAdapter(object):
         connection = db_engine.connect()
         select_stmt = self._ta_select.where(conditions)
         result = connection.execute(select_stmt)
-        print("result", result)
+        rows = [row._mapping for row in result.fetchall()]
         connection.close()
-        return ResultAdapter(result, self.table, colMap=self.colMap)
+        return rows
 
     def get(self, db_engine, theID):
         """Get an object given its ID."""
