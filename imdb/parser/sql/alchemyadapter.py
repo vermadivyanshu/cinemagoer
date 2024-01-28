@@ -279,7 +279,8 @@ class TableAdapter(object):
     def select(self, db_engine, conditions=None):
         """Return a list of results."""
         connection = db_engine.connect()
-        result = connection.execute(self._ta_select(conditions))
+        select_stmt = self._ta_select.where(conditions)
+        result = connection.execute(select_stmt)
         connection.close()
         return ResultAdapter(result, self.table, colMap=self.colMap)
 
