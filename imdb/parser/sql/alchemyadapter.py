@@ -271,7 +271,7 @@ class TableAdapter(object):
         # Create the table.
         self.table = Table(self.tableName, metadata, *columns)
         self._ta_insert = self.table.insert()
-        self._ta_select = self.table.select
+        self._ta_select = self.table.select()
         # Adapters for special attributes.
         self.q = QAdapter(self.table, colMap=self.colMap)
         self.sqlmeta = SQLMetaAdapter(self.table, colMap=self.colMap)
