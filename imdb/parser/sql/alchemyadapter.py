@@ -357,6 +357,8 @@ class TableAdapter(object):
         taArgs = {}
         for key, value in list(kwds.items()):
             taArgs[self.colMap.get(key, key)] = value
+        print("args", args, taArgs)
+        print(self._ta_insert.values(*args, **taArgs))
         return self._ta_insert.values(*args, **taArgs)
 
     def __repr__(self):

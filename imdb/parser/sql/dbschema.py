@@ -411,14 +411,14 @@ def createTables(tables, db_engine, ifNotExists=True):
         # Insert default values, if any.
         print("table._imdbpySchema.values", table._imdbpySchema.values);
         if table._imdbpySchema.values:
-            conn = db_engine.connect()
+            conn = db_engine.connect().execution_options(isolation_level="AUTOCOMMIT")
             _dbschema_logger.info('inserting values into table %s', table._imdbpyName)
             for key in table._imdbpySchema.values:
                 for value in table._imdbpySchema.values[key]:
-                    print("query", table(**{key: str(value)}))
-                    conn.execute(table(**{key: str(value)}))
+                    print("query", {key: str(value)})
+                    res = conn.execute(table(**{key: str(value)}))
+                    print("rowcount", res.rowcount)
                     # table(**{key: str(value)})
-            conn.commit()
             conn.close()
 
 
