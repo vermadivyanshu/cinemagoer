@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/opt/homebrew/Caskroom/miniforge/base/bin/python3.10
 # -*- coding: utf-8 -*-
 """
 imdbpy2sql.py script.
@@ -1090,7 +1090,7 @@ class MoviesCache(_BaseCache):
                 mdict['episode of'] = series_d
             title = build_title(mdict, ptdf=True)
             dict.__setitem__(self, title, x[0])
-        self.counter = counter(Title.select().count() + 1)
+        self.counter = counter(len(Title.select(db_engine)) + 1)
         Title.sqlmeta.cacheValues = _oldcacheValues
 
     def _toDB(self, quiet=0):
@@ -1179,7 +1179,7 @@ class PersonsCache(_BaseCache):
                 nd['imdbIndex'] = x[2]
             name = build_name(nd)
             dict.__setitem__(self, name, x[0])
-        self.counter = counter(Name.select().count() + 1)
+        self.counter = counter(len(Name.select(db_engine)) + 1)
         Name.sqlmeta.cacheValues = _oldcacheValues
 
     def _toDB(self, quiet=0):
@@ -1238,7 +1238,7 @@ class CharactersCache(_BaseCache):
                 nd['imdbIndex'] = x[2]
             name = build_name(nd)
             dict.__setitem__(self, name, x[0])
-        self.counter = counter(CharName.select().count() + 1)
+        self.counter = counter(len(CharName.select(db_engine)) + 1)
         CharName.sqlmeta.cacheValues = _oldcacheValues
 
     def _toDB(self, quiet=0):
@@ -1296,7 +1296,7 @@ class CompaniesCache(_BaseCache):
                 nd['country'] = x[2]
             name = build_company_name(nd)
             dict.__setitem__(self, name, x[0])
-        self.counter = counter(CompanyName.select().count() + 1)
+        self.counter = counter(len(CompanyName.select(db_engine)) + 1)
         CompanyName.sqlmeta.cacheValues = _oldcacheValues
 
     def _toDB(self, quiet=0):
@@ -1352,7 +1352,7 @@ class KeywordsCache(_BaseCache):
         Keyword.sqlmeta.cacheValues = False
         for x in fetchsome(CURS, self.flushEvery):
             dict.__setitem__(self, x[1], x[0])
-        self.counter = counter(Keyword.select().count() + 1)
+        self.counter = counter(len(Keyword.select(db_engine)) + 1)
         Keyword.sqlmeta.cacheValues = _oldcacheValues
 
     def _toDB(self, quiet=0):
@@ -1659,7 +1659,7 @@ def doCast(fp, roleid, rolename):
 
 def castLists():
     """Read files listed in the 'role' column of the 'roletypes' table."""
-    rt = [(x.id, x.role) for x in RoleType.select()]
+    rt = [(x.id, x.role) for x in RoleType.select(db_engine)]
     for roleid, rolename in rt:
         if rolename == 'guest':
             continue
@@ -2201,8 +2201,9 @@ def nmmvFiles(fp, funct, fname):
     if fname == 'biographies.list.gz':
         datakind = 'person'
         sqls = sqlsP
-        guestid = RoleType.select(RoleType.q.role == 'guest')[0].id
-        roleid = str(guestid)
+        guestid = RoleType.select(db_engine, RoleType.table.c.role == 'guest')[0].get('id')
+        roleid = str(guestid) if guestid else None
+        print("roleid", roleid)
         guestdata = SQLData(table=CastInfo,
                             cols=['personID', 'movieID', 'personRoleID', 'note',
                                   RawValue('roleID', roleid)], flushEvery=10000)
@@ -2682,7 +2683,7 @@ def getPlot(lines):
 def completeCast():
     """Movie's complete cast/crew information."""
     CCKind = {}
-    cckinds = [(x.id, x.kind) for x in CompCastType.select()]
+    cckinds = [(x.id, x.kind) for x in CompCastType.select(db_engine)]
     for k, v in cckinds:
         CCKind[v] = k
     for fname, start in [('complete-cast.list.gz', COMPCAST_START),
